@@ -3,6 +3,8 @@ services:
     image: jay2323/fashion-ai-backend:restore
     container_name: fashion-ai-backend
     restart: unless-stopped
+    volumes:
+    - ./storage:/app/storage  # Add persistent storage volume
     environment:
       - GEMINI_API_KEY_01=${GEMINI_API_KEY_01:?GEMINI_API_KEY_01 is required}
       - GEMINI_API_KEY_02=${GEMINI_API_KEY_02:-}  # Optional fallback key

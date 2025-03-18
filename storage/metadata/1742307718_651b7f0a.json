@@ -1,0 +1,18 @@
+{
+  "id": "1742307718_651b7f0a",
+  "timestamp": "2025-03-18T14:21:58.682325",
+  "prompt": "CREATE A PHOTOREALISTIC IMAGE of a female fashion model standing in a relaxed, natural pose wearing this clothing item\n\nSetting: Outdoor nature setting with appropriate natural elements\n\nStyle: The model should look authentic and relatable with a natural expression and a subtle smile. The clothing must fit perfectly and be the visual focus of the image.\n\nTechnical details: Professional fashion photography lighting with perfect exposure and color accuracy.",
+  "gender": "female",
+  "bodyType": null,
+  "bodySize": null,
+  "height": null,
+  "age": null,
+  "ethnicity": null,
+  "background": "outdoor-nature",
+  "pose": "natural",
+  "cameraAngle": null,
+  "lens": null,
+  "isCustomPrompt": false,
+  "tags": [],
+  "createdAt": "2025-03-18T14:21:57.543Z"
+}

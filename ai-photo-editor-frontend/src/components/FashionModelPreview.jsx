@@ -210,9 +210,16 @@ function FashionModelPreview({ clothingImage, onImageGenerated, hidePreview = fa
       subjectAttributes.push(heightLabel);
     }
     
-    if (ethnicity !== 'default' && ethnicity !== 'diverse') {
-      const ethnicityLabel = ethnicityOptions.find(o => o.value === ethnicity)?.label || '';
-      subjectAttributes.push(ethnicityLabel);
+    // FIX: Handle ethnicity "diverse" option explicitly
+    if (ethnicity !== 'default') {
+      if (ethnicity === 'diverse') {
+        // Add explicit diversity instruction
+        subjectAttributes.push("with diverse ethnic features");
+      } else {
+        // Handle other ethnicities as before
+        const ethnicityLabel = ethnicityOptions.find(o => o.value === ethnicity)?.label || '';
+        subjectAttributes.push(ethnicityLabel);
+      }
     }
     
     if (bodyType !== 'default') {

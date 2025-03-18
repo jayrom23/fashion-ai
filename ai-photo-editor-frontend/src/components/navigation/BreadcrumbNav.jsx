@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useWorkspaceContext } from '../../hooks/useWorkspaceContext';
-import { getWorkflowSteps } from '../../utils/navigationSteps';
+import { getWorkflowSteps } from '../../utils/navigationSteps.jsx';
 
 /**
  * Breadcrumb navigation component showing current workflow position

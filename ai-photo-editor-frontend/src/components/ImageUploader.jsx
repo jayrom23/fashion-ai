@@ -112,7 +112,7 @@ function ImageUploader({ onImageUploaded, isActive = true, onActivate = () => {}
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap md:flex-nowrap gap-6">
-        <div className="w-full md:w-3/5">
+        <div className="w-full">
           {!previewUrl ? (
             <div 
               className={`border-2 border-dashed ${isDragging ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10' : 'border-gray-300 dark:border-gray-700'} 
@@ -167,29 +167,6 @@ function ImageUploader({ onImageUploaded, isActive = true, onActivate = () => {}
             </div>
           )}
         </div>
-        
-        <div className="w-full md:w-2/5 space-y-4">
-          <div className={CARD_STYLES.container}>
-            <h3 className={CARD_STYLES.title}>Tips for best results</h3>
-            <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700 dark:text-gray-300">
-              <li>Use high-quality product photos</li>
-              <li>Ensure the clothing item is clearly visible</li>
-              <li>Photos with plain backgrounds work best</li>
-              <li>For best results, use photos where the item is displayed flat or on a mannequin</li>
-            </ul>
-          </div>
-          
-          {previewUrl && !loading && (
-            <div className="flex">
-              <button
-                onClick={handleCancel}
-                className={`${BUTTON_VARIANTS.secondary} mr-3`}
-              >
-                Choose Different Image
-              </button>
-            </div>
-          )}
-        </div>
       </div>
       
       {error && (
@@ -202,6 +179,17 @@ function ImageUploader({ onImageUploaded, isActive = true, onActivate = () => {}
         <div className="w-full flex justify-center items-center py-8">
           <LoadingSpinner size="lg" color="text-primary-600" />
           <span className="ml-3 text-gray-700 dark:text-gray-300">Processing image...</span>
+        </div>
+      )}
+      
+      {previewUrl && !loading && (
+        <div className="flex">
+          <button
+            onClick={handleCancel}
+            className={BUTTON_VARIANTS.secondary}
+          >
+            Choose Different Image
+          </button>
         </div>
       )}
     </div>

@@ -1,3 +1,4 @@
+import React from 'react';
 import PropTypes from 'prop-types';
 import { toast } from 'react-hot-toast';
 import InfoBox from '../common/InfoBox';
@@ -11,78 +12,91 @@ import { CARD_STYLES, BUTTON_VARIANTS } from '../../styles/constants';
  * @param {function} setIsUsingCustomPrompt - Function to update isUsingCustomPrompt state
  * @param {function} buildEnhancedPrompt - Function to build default prompt
  */
-function AdvancedTabPanel({
-  customPrompt,
-  isUsingCustomPrompt,
-  setCustomPrompt,
+function AdvancedTabPanel({ 
+  customPrompt, 
+  isUsingCustomPrompt, 
+  setCustomPrompt, 
   setIsUsingCustomPrompt,
   buildEnhancedPrompt
 }) {
+  // Get the auto-generated prompt for preview
+  const generatedPrompt = buildEnhancedPrompt();
+  
   return (
-    <div className={CARD_STYLES.container}>
-      <h3 className={CARD_STYLES.title}>Advanced Prompt Editor</h3>
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            {customPrompt.length || buildEnhancedPrompt().length} characters
-            {(customPrompt.length > 800 || (!customPrompt && buildEnhancedPrompt().length > 800)) && 
-              <span className="text-amber-600 dark:text-amber-400 ml-2">
-                (Very long prompts may be truncated)
-              </span>
-            }
-          </div>
-          <div className="space-x-2">
-            <button
-              onClick={() => {
-                setCustomPrompt(buildEnhancedPrompt());
-                setIsUsingCustomPrompt(false);
-              }}
-              className="text-xs py-1 px-2 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
-            >
-              Reset
-            </button>
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(customPrompt || buildEnhancedPrompt());
-                toast.success('Prompt copied!');
-              }}
-              className="text-xs py-1 px-2 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
-            >
-              Copy
-            </button>
-          </div>
-        </div>
-        <textarea
-          value={customPrompt || buildEnhancedPrompt()}
-          onChange={(e) => {
-            setCustomPrompt(e.target.value);
-            setIsUsingCustomPrompt(true);
-          }}
-          className="w-full border rounded-md p-3 h-48 dark:bg-gray-800 dark:border-gray-600"
-          placeholder="Edit the generation prompt..."
-        />
-        <div className="mt-2 flex items-center">
+    <div className="space-y-4">
+      {/* Toggle for custom vs. auto prompt */}
+      <div className="flex items-center mb-2">
+        <div className="flex items-center mr-6">
           <input
-            type="checkbox"
-            id="useCustomPrompt"
-            checked={isUsingCustomPrompt}
-            onChange={(e) => setIsUsingCustomPrompt(e.target.checked)}
-            className="mr-2"
+            id="auto-prompt"
+            type="radio"
+            name="prompt-type"
+            className="h-4 w-4 text-primary-600 border-gray-300 focus:ring-primary-500"
+            checked={!isUsingCustomPrompt}
+            onChange={() => setIsUsingCustomPrompt(false)}
           />
-          <label htmlFor="useCustomPrompt" className="text-sm text-gray-700 dark:text-gray-300">
-            Use edited prompt instead of auto-generated
+          <label 
+            htmlFor="auto-prompt" 
+            className="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300" // FIXED: Improved text contrast
+          >
+            Auto-generated prompt
           </label>
         </div>
         
-        <InfoBox type="warning" title="Advanced users only">
-          Edit the prompt directly to fine-tune the generation. Be sure to maintain the key instruction "CREATE A PHOTOREALISTIC IMAGE" at the beginning.
-        </InfoBox>
+        <div className="flex items-center">
+          <input
+            id="custom-prompt"
+            type="radio"
+            name="prompt-type"
+            className="h-4 w-4 text-primary-600 border-gray-300 focus:ring-primary-500"
+            checked={isUsingCustomPrompt}
+            onChange={() => setIsUsingCustomPrompt(true)}
+          />
+          <label 
+            htmlFor="custom-prompt" 
+            className="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300" // FIXED: Improved text contrast
+          >
+            Custom prompt
+          </label>
+        </div>
       </div>
+      
+      {/* Prompt editor */}
+      <div>
+        <label 
+          htmlFor="prompt-editor" 
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" // FIXED: Improved text contrast
+        >
+          {isUsingCustomPrompt ? 'Edit Prompt' : 'Preview Auto-Generated Prompt'}
+        </label>
+        <textarea
+          id="prompt-editor"
+          rows={8}
+          className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md 
+                    bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200" // FIXED: Improved text contrast
+          value={isUsingCustomPrompt ? customPrompt : generatedPrompt}
+          onChange={(e) => setCustomPrompt(e.target.value)}
+          readOnly={!isUsingCustomPrompt}
+          placeholder={isUsingCustomPrompt ? "Enter your custom prompt..." : ""}
+        />
+      </div>
+      
+      {/* Helpful tips */}
+      {isUsingCustomPrompt && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-3">
+          <h4 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-1">Tips for writing prompts:</h4>
+          <ul className="list-disc pl-5 text-xs text-blue-700 dark:text-blue-400">
+            <li>Be specific about clothing details you want to highlight</li>
+            <li>Include "photorealistic" for realistic results</li>
+            <li>Specify "professional photography" for higher quality</li>
+            <li>Describe the environment and lighting you want</li>
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
 
-// Add PropTypes validation
 AdvancedTabPanel.propTypes = {
   customPrompt: PropTypes.string.isRequired,
   isUsingCustomPrompt: PropTypes.bool.isRequired,

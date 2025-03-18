@@ -11,8 +11,6 @@ function WorkspaceActions() {
     currentImages, 
     toggleGallery,
     showGallery,
-    toggleWorkspacePanel,
-    showWorkspacePanel
   } = useWorkspaceContext();
   
   const hasContent = currentImages.uploaded || currentImages.generated;
@@ -23,6 +21,7 @@ function WorkspaceActions() {
   
   return (
     <div className="workspace-actions flex items-center space-x-2">
+      {/* Gallery Toggle Button - Now with enhanced styling since it's the only button */}
       <Button 
         variant="secondary"
         size="md"
@@ -33,16 +32,7 @@ function WorkspaceActions() {
         {showGallery ? 'Hide Gallery' : 'Show Gallery'}
       </Button>
       
-      <Button 
-        variant="secondary"
-        size="md"
-        onClick={toggleWorkspacePanel}
-        aria-pressed={showWorkspacePanel}
-        icon={showWorkspacePanel ? '📁' : '📂'}
-      >
-        {showWorkspacePanel ? 'Hide History' : 'Show History'}
-      </Button>
-      
+      {/* Save Version Button - unchanged */}
       <SaveVersionButton 
         variant="primary-light"
         buttonText="Save Version"

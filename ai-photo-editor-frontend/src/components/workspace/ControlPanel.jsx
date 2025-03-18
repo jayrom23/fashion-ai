@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useWorkspaceContext } from '../../hooks/useWorkspaceContext';
-import GeneratedImageView from '../GeneratedImageView'; // For metadata display
 import { AnimatePresence, motion } from 'framer-motion';
 import { TRANSITIONS } from '../../utils/animations';
+import toast from 'react-hot-toast';
 
 /**
  * Control panel showing context-specific supplementary information
@@ -13,10 +13,103 @@ function ControlPanel() {
     currentMode, 
     currentImages, 
     generatedImageMetadata,
-    imageId
+    updateGenerationSettings
   } = useWorkspaceContext();
   
   const [isCollapsed, setIsCollapsed] = useState(false);
+  
+  // Templates for quick generation presets
+  const generationTemplates = [
+    {
+      name: "Casual Outdoor",
+      settings: {
+        background: 'outdoor-nature',
+        pose: 'natural',
+        cameraAngle: 'eye-level',
+        lens: 'standard'
+      }
+    },
+    {
+      name: "Studio Professional",
+      settings: {
+        background: 'studio-white',
+        pose: 'professional',
+        cameraAngle: 'three-quarter',
+        lens: 'portrait'
+      }
+    },
+    {
+      name: "Urban Style",
+      settings: {
+        background: 'outdoor-urban',
+        pose: 'editorial',
+        cameraAngle: 'low-angle',
+        lens: 'wide'
+      }
+    },
+    {
+      name: "Formal Event",
+      settings: {
+        background: 'lifestyle-office',
+        pose: 'professional',
+        cameraAngle: 'eye-level',
+        lens: 'telephoto'
+      }
+    }
+  ];
+  
+  // Apply template settings
+  const applyTemplate = (template) => {
+    updateGenerationSettings(template.settings);
+    toast.success(`Applied "${template.name}" template`);
+  };
+  
+  // Download generated image
+  const downloadImage = (format = 'png') => {
+    if (!currentImages.generated) return;
+    
+    try {
+      // Create an image from base64 data
+      const img = new Image();
+      img.onload = () => {
+        // Create a canvas to potentially handle format conversion
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        
+        // Draw image on canvas
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        
+        // Create download link
+        const link = document.createElement('a');
+        
+        // Set image format and quality
+        const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+        const quality = format === 'png' ? 1.0 : 0.92;
+        
+        // Get data URL with appropriate format
+        link.href = canvas.toDataURL(mimeType, quality);
+        
+        // Set filename
+        link.download = `fashion-model-${Date.now()}.${format}`;
+        
+        // Trigger download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        toast.success(`Downloaded image as ${format.toUpperCase()}`);
+      };
+      
+      // Start the process by loading the image
+      img.src = `data:image/jpeg;base64,${currentImages.generated}`;
+      
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      toast.error('Failed to download image');
+    }
+  };
   
   return (
     <div className="control-panel h-full overflow-y-auto">
@@ -56,7 +149,7 @@ function ControlPanel() {
             </div>
           )}
           
-          {/* Generate mode - only show a compact clothing preview and template presets */}
+          {/* Generate mode - show clothing preview and FUNCTIONAL template presets */}
           {currentMode === 'generate' && currentImages.uploaded && (
             <div className="space-y-6">
               <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
@@ -73,24 +166,23 @@ function ControlPanel() {
               <div className="space-y-4">
                 <h3 className="font-medium text-gray-700 dark:text-gray-200">Template Presets</h3>
                 <div className="grid grid-cols-2 gap-2">
-                  <button className="p-2 border border-gray-200 dark:border-gray-700 rounded text-sm hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300">
-                    Casual Outdoor
-                  </button>
-                  <button className="p-2 border border-gray-200 dark:border-gray-700 rounded text-sm hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300">
-                    Studio Professional
-                  </button>
-                  <button className="p-2 border border-gray-200 dark:border-gray-700 rounded text-sm hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300">
-                    Urban Style
-                  </button>
-                  <button className="p-2 border border-gray-200 dark:border-gray-700 rounded text-sm hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300">
-                    Formal Event
-                  </button>
+                  {generationTemplates.map((template, index) => (
+                    <button 
+                      key={index}
+                      onClick={() => applyTemplate(template)} 
+                      className="p-2 border border-gray-200 dark:border-gray-700 rounded text-sm 
+                                hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300
+                                transition-colors duration-150 hover:border-primary-300 dark:hover:border-primary-700"
+                    >
+                      {template.name}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
           )}
           
-          {/* Edit mode - show metadata and export options */}
+          {/* Edit mode - show metadata and WORKING export options */}
           {currentMode === 'edit' && currentImages.generated && (
             <div className="space-y-6">
               <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100 flex justify-between items-center">
@@ -141,37 +233,21 @@ function ControlPanel() {
                 {/* Divider */}
                 <hr className="border-gray-200 dark:border-gray-700" />
                 
-                {/* Export options */}
+                {/* Export options - with actual functionality */}
                 <div>
                   <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-3">Export Options</h3>
                   <div className="space-y-3">
-                    <button className="w-full py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors duration-150">
-                      Export as PNG
+                    <button 
+                      onClick={() => downloadImage('png')} 
+                      className="w-full py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors duration-150"
+                    >
+                      Download as PNG
                     </button>
-                    <button className="w-full py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 transition-colors duration-150">
-                      Export as JPG
-                    </button>
-                    <button className="w-full py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 transition-colors duration-150">
-                      Save to Project
-                    </button>
-                  </div>
-                </div>
-                
-                {/* Tags section */}
-                <div>
-                  <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-3">Tags</h3>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm text-gray-700 dark:text-gray-200">
-                      Fashion
-                    </span>
-                    <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm text-gray-700 dark:text-gray-200">
-                      AI Generated
-                    </span>
-                    <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm text-gray-700 dark:text-gray-200">
-                      {generatedImageMetadata?.gender || 'Model'}
-                    </span>
-                    <button className="px-2 py-1 border border-dashed border-gray-300 dark:border-gray-600 rounded text-sm text-gray-500 dark:text-gray-400">
-                      + Add Tag
+                    <button 
+                      onClick={() => downloadImage('jpg')} 
+                      className="w-full py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 transition-colors duration-150"
+                    >
+                      Download as JPG
                     </button>
                   </div>
                 </div>

@@ -1,7 +1,6 @@
+import React from 'react';
 import PropTypes from 'prop-types';
-import AttributeSelect from '../common/AttributeSelect';
-import InfoBox from '../common/InfoBox';
-import CardContainer from '../common/CardContainer';
+import SelectOption from '../common/SelectOption';
 import useComponentStyles from '../../hooks/useComponentStyles';
 
 /**
@@ -24,78 +23,72 @@ function BasicsTabPanel({
   const styles = useComponentStyles();
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Gender selection */}
-      <CardContainer title="Model Gender">
-        <div className="flex flex-wrap gap-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Gender
+        </label>
+        <div className="flex space-x-3">
           <button
+            className={`flex-1 py-2 px-4 rounded-md border ${
+              gender === 'female'
+                ? 'bg-primary-100 border-primary-300 text-primary-800 dark:bg-primary-900/30 dark:border-primary-700 dark:text-primary-300'
+                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600/50'
+            }`}
             onClick={() => trackChange('gender', 'female')}
-            className={`flex-1 py-3 px-4 rounded-lg border ${gender === 'female' 
-              ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-500 dark:border-primary-400' 
-              : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700'} transition-colors`}
           >
-            <div className="text-2xl mb-1">👩</div>
-            <div className="font-medium">Female</div>
+            Female
           </button>
           <button
+            className={`flex-1 py-2 px-4 rounded-md border ${
+              gender === 'male'
+                ? 'bg-primary-100 border-primary-300 text-primary-800 dark:bg-primary-900/30 dark:border-primary-700 dark:text-primary-300'
+                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600/50'
+            }`}
             onClick={() => trackChange('gender', 'male')}
-            className={`flex-1 py-3 px-4 rounded-lg border ${gender === 'male' 
-              ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-500 dark:border-primary-400' 
-              : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700'} transition-colors`}
           >
-            <div className="text-2xl mb-1">👨</div>
-            <div className="font-medium">Male</div>
+            Male
           </button>
         </div>
-      </CardContainer>
-      
-      {/* Basic body size selection */}
-      <CardContainer title="Basic Sizing">
-        <div className={styles.grid.twoColumn}>
-          <AttributeSelect 
-            label="Body Size" 
-            stateKey="bodySize"
-            value={bodySize} 
-            onChange={trackChange} 
-            options={bodySizeOptions}
-          />
-          <AttributeSelect 
-            label="Height" 
-            stateKey="height"
-            value={height} 
-            onChange={trackChange} 
-            options={heightOptions}
-          />
-        </div>
-        
-        <InfoBox type="tip" title="Tip">
-          "Default" options won't be included in the prompt - the AI will decide based on context. Select specific values only when important for your item.
-        </InfoBox>
-      </CardContainer>
+      </div>
+
+      {/* Body size selection with description */}
+      <div>
+        <label htmlFor="body-size" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Body Size
+        </label>
+        <SelectOption
+          id="body-size"
+          value={bodySize}
+          onChange={(e) => trackChange('bodySize', e.target.value)}
+          options={bodySizeOptions}
+        />
+      </div>
+
+      {/* Height selection with description */}
+      <div>
+        <label htmlFor="height" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Height
+        </label>
+        <SelectOption
+          id="height"
+          value={height}
+          onChange={(e) => trackChange('height', e.target.value)}
+          options={heightOptions}
+        />
+      </div>
     </div>
   );
 }
 
-// Add PropTypes validation
 BasicsTabPanel.propTypes = {
   gender: PropTypes.string.isRequired,
   trackChange: PropTypes.func.isRequired,
   bodySize: PropTypes.string.isRequired,
   height: PropTypes.string.isRequired,
-  bodySizeOptions: PropTypes.arrayOf(
-    PropTypes.shape({
-      value: PropTypes.string.isRequired,
-      label: PropTypes.string.isRequired,
-      description: PropTypes.string
-    })
-  ).isRequired,
-  heightOptions: PropTypes.arrayOf(
-    PropTypes.shape({
-      value: PropTypes.string.isRequired,
-      label: PropTypes.string.isRequired,
-      description: PropTypes.string
-    })
-  ).isRequired
+  bodySizeOptions: PropTypes.array.isRequired,
+  heightOptions: PropTypes.array.isRequired
 };
 
 export default BasicsTabPanel;
