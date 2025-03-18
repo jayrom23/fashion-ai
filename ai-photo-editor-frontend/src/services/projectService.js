@@ -26,6 +26,16 @@ const projectService = {
     }
   },
 
+  getProject(id) {
+    try {
+      const projects = this.getProjects();
+      return projects.find(p => p.id === id) || null;
+    } catch (error) {
+      console.error('Error retrieving project:', error);
+      return null;
+    }
+  },
+
   saveProject(project) {
     try {
       const projects = this.getProjects();
@@ -50,6 +60,48 @@ const projectService = {
       return true;
     } catch (error) {
       console.error('Error saving project:', error);
+      return false;
+    }
+  },
+
+  createProject(project) {
+    try {
+      const newProject = {
+        ...project,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      const projects = this.getProjects();
+      projects.push(newProject);
+      
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+      return newProject;
+    } catch (error) {
+      console.error('Error creating project:', error);
+      throw new Error('Failed to create project');
+    }
+  },
+  
+  updateProject(project) {
+    try {
+      const projects = this.getProjects();
+      const index = projects.findIndex(p => p.id === project.id);
+      
+      if (index === -1) {
+        return false;
+      }
+      
+      projects[index] = {
+        ...project,
+        updatedAt: new Date().toISOString()
+      };
+      
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+      return true;
+    } catch (error) {
+      console.error('Error updating project:', error);
       return false;
     }
   },

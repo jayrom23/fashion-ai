@@ -7,7 +7,7 @@ echo "==============================="
 
 # Configuration
 DOCKER_USERNAME="jay2323"
-VERSION="gallery"
+VERSION="restore"
 BACKEND_DIR="."
 FRONTEND_DIR="./ai-photo-editor-frontend"
 
