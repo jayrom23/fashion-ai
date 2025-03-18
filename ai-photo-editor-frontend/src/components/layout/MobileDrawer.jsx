@@ -13,6 +13,13 @@ function MobileDrawer({ isOpen, onClose }) {
     e.stopPropagation();
   };
   
+  // Add swipe-to-close functionality
+  const handleSwipeClose = (_, info) => {
+    if (info.offset.x < -50) { // User swiped left more than 50px
+      onClose();
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -40,6 +47,10 @@ function MobileDrawer({ isOpen, onClose }) {
             exit="exit"
             variants={TRANSITIONS.DRAWER_RIGHT}
             onClick={handleDrawerClick}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleSwipeClose}
           >
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
               <h2 className="font-medium text-gray-800 dark:text-gray-200">Workspace</h2>

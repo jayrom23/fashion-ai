@@ -1,6 +1,8 @@
 import React, { createContext, useReducer, useEffect, useCallback } from 'react';
 import { workspaceReducer } from '../reducers/workspaceReducer';
 import projectService from '../services/projectService';
+import storageService from '../utils/storageService';
+import toast from 'react-hot-toast';
 
 // Define initial state structure
 const initialState = {
@@ -66,18 +68,20 @@ export function WorkspaceProvider({ children }) {
       }
     }
     
-    // Load workspace versions from localStorage
-    const savedVersions = localStorage.getItem('workspaceStates');
-    if (savedVersions) {
-      try {
-        dispatch({
-          type: 'RESTORE_VERSIONS',
-          payload: JSON.parse(savedVersions)
-        });
-      } catch (error) {
-        console.error('Failed to parse saved workspace versions', error);
-      }
-    }
+    // Load workspace versions from storage service
+    storageService.getVersions()
+      .then(versions => {
+        if (versions && versions.length > 0) {
+          dispatch({
+            type: 'RESTORE_VERSIONS',
+            payload: versions
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Failed to load workspace versions', error);
+        toast.error('Could not load your previous work versions');
+      });
     
     // Load active version ID
     const activeVersionId = localStorage.getItem('activeWorkspaceId');
@@ -121,10 +125,14 @@ export function WorkspaceProvider({ children }) {
     }));
   }, [state]);
   
-  // Persist versions separately (they might be large)
+  // Persist versions using storage service with error handling
   useEffect(() => {
     if (state.versions.length > 0) {
-      localStorage.setItem('workspaceStates', JSON.stringify(state.versions));
+      storageService.saveVersions(state.versions)
+        .catch(error => {
+          console.error('Error saving versions:', error);
+          toast.error('Could not save all your work versions');
+        });
     }
   }, [state.versions]);
   

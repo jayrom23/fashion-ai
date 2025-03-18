@@ -3,10 +3,11 @@ import { useWorkspaceContext } from '../../hooks/useWorkspaceContext';
 import projectService from '../../services/projectService';
 import toast from 'react-hot-toast';
 import Modal from '../common/Modal';
+import Button from '../common/Button';
+import ConfirmationDialog from '../common/ConfirmationDialog';
 
 /**
  * Project selector component for managing projects in the workspace
- * Fully integrated with the existing projectService
  */
 function ProjectSelector() {
   const { 
@@ -167,9 +168,6 @@ function ProjectSelector() {
       } catch (error) {
         console.error('Error deleting project:', error);
         toast.error('Failed to delete project');
-      } finally {
-        setDeleteModalOpen(false);
-        setProjectToDelete(null);
       }
     }
   };
@@ -179,31 +177,42 @@ function ProjectSelector() {
       <div className="flex justify-between items-center mb-2">
         <span className="text-sm text-gray-500 dark:text-gray-400">Current Project</span>
         <div className="flex gap-1">
-          <button 
+          <Button 
+            variant="link"
+            size="sm"
             onClick={() => setIsCreateOpen(true)}
-            className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
             aria-label="Create new project"
           >
             + New
-          </button>
+          </Button>
           
-          <label className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 cursor-pointer">
-            Import
+          <label className="flex items-center cursor-pointer">
+            <Button
+              variant="link"
+              size="sm"
+              as="span"
+              aria-label="Import project"
+            >
+              Import
+            </Button>
             <input 
               type="file" 
               accept="application/json" 
               onChange={handleImport}
               className="hidden"
-              aria-label="Import project"
             />
           </label>
         </div>
       </div>
       
+      {/* Current project selector button */}
       <div className="relative">
-        <button 
+        <Button 
+          variant="secondary"
+          size="md"
+          fullWidth
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="w-full py-1.5 px-3 text-left text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700/50 flex justify-between items-center"
+          className="text-left justify-between"
           aria-haspopup="true"
           aria-expanded={isMenuOpen}
         >
@@ -213,10 +222,10 @@ function ProjectSelector() {
               'No Active Project'
             }
           </span>
-          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
           </svg>
-        </button>
+        </Button>
         
         {/* Create Project Dialog */}
         <Modal
@@ -241,16 +250,18 @@ function ProjectSelector() {
             </div>
             
             <div className="flex justify-end space-x-3">
-              <button 
-                onClick={() => setIsCreateOpen(false)} 
-                className="px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+              <Button 
+                variant="secondary"
+                size="md"
+                onClick={() => setIsCreateOpen(false)}
               >
                 Cancel
-              </button>
+              </Button>
               
-              <button 
+              <Button 
+                variant="primary"
+                size="md"
                 onClick={handleCreateProject}
-                className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-md hover:bg-primary-700 flex items-center"
                 disabled={!newProjectName.trim() || isLoading}
               >
                 {isLoading ? (
@@ -262,7 +273,7 @@ function ProjectSelector() {
                     Creating...
                   </>
                 ) : 'Create Project'}
-              </button>
+              </Button>
             </div>
           </div>
         </Modal>
@@ -308,24 +319,29 @@ function ProjectSelector() {
                       {project.name || `Project ${project.id.slice(-4)}`}
                     </p>
                     <div className="flex gap-2 ml-2">
-                      <button 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={(e) => handleExport(project.id, e)}
-                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                         aria-label="Export project"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                      </button>
-                      <button 
+                        icon={
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                        }
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={(e) => handleDeleteClick(project.id, e)}
-                        className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
                         aria-label="Delete project"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
+                        icon={
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        }
+                        className="hover:text-red-600 dark:hover:text-red-400"
+                      />
                     </div>
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -338,34 +354,23 @@ function ProjectSelector() {
         )}
       </div>
       
-      {/* Delete confirmation modal */}
-      <Modal
+      {/* Replace delete confirmation modal with ConfirmationDialog */}
+      <ConfirmationDialog
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
         title="Delete Project"
-        size="sm"
-      >
-        <div className="space-y-4">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+        message={
+          <>
             Are you sure you want to delete project "<span className="font-medium">{projectToDelete?.name || 'Untitled'}</span>"? 
             This action cannot be undone.
-          </p>
-          <div className="flex justify-end space-x-3">
-            <button
-              onClick={() => setDeleteModalOpen(false)}
-              className="px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={confirmDelete}
-              className="px-3 py-1.5 text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </Modal>
+          </>
+        }
+        confirmVariant="danger"
+        confirmText="Delete"
+        cancelText="Cancel"
+        size="sm"
+      />
     </div>
   );
 }

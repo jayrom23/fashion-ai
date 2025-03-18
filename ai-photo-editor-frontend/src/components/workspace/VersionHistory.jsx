@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useWorkspaceContext } from '../../hooks/useWorkspaceContext';
-import Modal from '../common/Modal';
+import ConfirmationDialog from '../common/ConfirmationDialog';
 
 /**
  * Version history component for the workspace that displays saved versions
@@ -21,8 +21,6 @@ function VersionHistory() {
   const confirmDelete = () => {
     if (versionToDelete) {
       deleteVersion(versionToDelete.id);
-      setDeleteModalOpen(false);
-      setVersionToDelete(null);
     }
   };
   
@@ -119,33 +117,23 @@ function VersionHistory() {
         ))}
       </div>
       
-      {/* Delete confirmation modal */}
-      <Modal
+      {/* Replace the Modal with ConfirmationDialog */}
+      <ConfirmationDialog
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
         title="Delete Version"
+        message={
+          <>
+            Are you sure you want to delete "<span className="font-medium">{versionToDelete?.name}</span>"? 
+            This action cannot be undone.
+          </>
+        }
+        confirmVariant="danger"
+        confirmText="Delete"
+        cancelText="Cancel"
         size="sm"
-      >
-        <div className="space-y-4">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            Are you sure you want to delete "<span className="font-medium">{versionToDelete?.name}</span>"? This action cannot be undone.
-          </p>
-          <div className="flex justify-end space-x-3">
-            <button
-              onClick={() => setDeleteModalOpen(false)}
-              className="px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={confirmDelete}
-              className="px-3 py-1.5 text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </Modal>
+      />
     </>
   );
 }

@@ -11,7 +11,7 @@ import EnvironmentTabPanel from './tab-panels/EnvironmentTabPanel';
 import PhotographyTabPanel from './tab-panels/PhotographyTabPanel';
 import AdvancedTabPanel from './tab-panels/AdvancedTabPanel';
 
-function FashionModelPreview({ clothingImage, onImageGenerated }) {
+function FashionModelPreview({ clothingImage, onImageGenerated, hidePreview = false }) {
   const [loading, setLoading] = useState(false);
   
   // Tab management
@@ -345,22 +345,26 @@ Technical details: ${technicalSection}`;
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left side: uploaded clothing image */}
-        <div className="md:col-span-1">
-          <ClothingPreview clothingImage={clothingImage} />
-        </div>
+      <div className={`grid grid-cols-1 ${hidePreview ? '' : 'md:grid-cols-3'} gap-6`}>
+        {/* Left side: uploaded clothing image - conditionally rendered */}
+        {!hidePreview && (
+          <div className="md:col-span-1">
+            <ClothingPreview clothingImage={clothingImage} />
+          </div>
+        )}
         
         {/* Right side: model customization options */}
-        <div className="md:col-span-2">
+        <div className={`${hidePreview ? 'col-span-full' : 'md:col-span-2'}`}>
           <div className="space-y-4">
-            {/* Tab Navigation */}
+            {/* Tab Navigation - make more responsive */}
             <div className="flex border-b dark:border-gray-700 overflow-x-auto hide-scrollbar">
+              {/* For small screens, show icons only */}
               <TabButton 
                 isActive={activeTab === 'basics'} 
                 onClick={() => setActiveTab('basics')}
                 icon="👔"
                 label="Basics"
+                showTextOnlyFrom="sm" // New prop to hide text on smallest screens
               />
               <TabButton 
                 isActive={activeTab === 'appearance'} 
@@ -468,7 +472,8 @@ Technical details: ${technicalSection}`;
 
 FashionModelPreview.propTypes = {
   clothingImage: PropTypes.string.isRequired,
-  onImageGenerated: PropTypes.func.isRequired
+  onImageGenerated: PropTypes.func.isRequired,
+  hidePreview: PropTypes.bool
 };
 
 export default FashionModelPreview;

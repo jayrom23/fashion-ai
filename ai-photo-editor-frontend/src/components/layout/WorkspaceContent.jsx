@@ -71,12 +71,12 @@ function WorkspaceContent() {
       {/* Main workspace grid */}
       <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
         {/* Canvas area (left on desktop, top on mobile) */}
-        <div className="md:w-3/5 lg:w-2/3 h-full overflow-auto">
+        <div className="md:w-3/5 lg:w-2/3 xl:w-3/4 h-full overflow-auto">
           <WorkspaceCanvas />
         </div>
         
-        {/* Control panel (right on desktop, bottom on mobile) */}
-        <div className="md:w-2/5 lg:w-1/3 border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-700 h-full overflow-auto bg-white dark:bg-gray-800">
+        {/* Control panel - adjust width settings but maintain reasonable constraints */}
+        <div className="md:w-2/5 lg:w-1/3 xl:w-1/4 border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-700 h-full overflow-auto bg-white dark:bg-gray-800">
           <ControlPanel />
         </div>
       </div>

@@ -5,15 +5,20 @@ import WorkflowSteps from '../navigation/WorkflowSteps';
 import VersionHistory from '../workspace/VersionHistory';
 import Modal from '../common/Modal';
 import toast from 'react-hot-toast';
+import { generateId } from '../../utils/idHelpers';
+import { handleError } from '../../utils/errorHandling';
 
 /**
  * Sidebar component specifically for mobile drawer
  * Duplicates Sidebar but with proper modal integration
  */
 function MobileDrawerSidebar() {
+  const COMPONENT_NAME = 'MobileSidebar';
   const { currentMode, saveCurrentState } = useWorkspaceContext();
   const [isSaveModalOpen, setSaveModalOpen] = useState(false);
   const [versionName, setVersionName] = useState('');
+  
+  const versionNameId = generateId(COMPONENT_NAME, 'versionName');
 
   const handleSaveVersion = () => {
     try {
@@ -22,8 +27,7 @@ function MobileDrawerSidebar() {
       setVersionName('');
       toast.success('Version saved successfully');
     } catch (error) {
-      console.error('Error saving version:', error);
-      toast.error('Failed to save version');
+      handleError(error, 'Failed to save version');
     }
   };
 
@@ -65,11 +69,11 @@ function MobileDrawerSidebar() {
       >
         <div className="space-y-4">
           <div>
-            <label htmlFor="mobileVersionName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor={versionNameId} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Version Name (optional)
             </label>
             <input
-              id="mobileVersionName"
+              id={versionNameId}
               type="text"
               value={versionName}
               onChange={(e) => setVersionName(e.target.value)}

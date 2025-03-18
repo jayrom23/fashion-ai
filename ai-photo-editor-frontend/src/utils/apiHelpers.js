@@ -1,6 +1,7 @@
 /**
  * API Helpers for cancellable requests
  */
+import React from 'react'; // Add missing React import for hooks
 
 /**
  * Creates a cancellable API request function

@@ -1,15 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useWorkspaceContext } from '../../hooks/useWorkspaceContext';
 import ImageUploader from '../ImageUploader';
+import FashionModelPreviewWrapper from '../wrapper/FashionModelPreviewWrapper';
 import { AnimatePresence, motion } from 'framer-motion';
 import { TRANSITIONS } from '../../utils/animations';
-import Modal from '../common/Modal';
+import SaveVersionButton from '../common/SaveVersionButton';
+import Modal from '../common/Modal'; // Add missing Modal import
 import toast from 'react-hot-toast';
 import { generateId } from '../../utils/idHelpers';
 import { handleError } from '../../utils/errorHandling';
 
 /**
  * The main canvas area for displaying and interacting with images
+ * Main tasks for each step should be here in the larger space
  */
 function WorkspaceCanvas() {
   // Component name for ID generation
@@ -28,10 +31,14 @@ function WorkspaceCanvas() {
   const [isMobile, setIsMobile] = useState(false);
   const [isSaveModalOpen, setSaveModalOpen] = useState(false);
   const [versionName, setVersionName] = useState('');
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [isPanning, setIsPanning] = useState(false);
+  const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
   
   // Refs for handling interactions
   const sliderRef = useRef(null);
   const isDraggingRef = useRef(false);
+  const imageContainerRef = useRef(null);
   
   // Track window size for responsive adjustments
   useEffect(() => {
@@ -117,6 +124,42 @@ function WorkspaceCanvas() {
     updatePosition(clientX);
   };
   
+  // Handle pan/drag functionality
+  const handlePanStart = () => {
+    if (zoomLevel > 1) {
+      setIsPanning(true);
+    }
+  };
+
+  const handlePanEnd = () => {
+    setIsPanning(false);
+  };
+
+  const handlePan = (e, info) => {
+    if (zoomLevel > 1 && isPanning) {
+      setPanPosition(prev => ({
+        x: prev.x + info.delta.x,
+        y: prev.y + info.delta.y
+      }));
+    }
+  };
+
+  // Handle wheel event for zooming
+  const handleWheel = (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const delta = -Math.sign(e.deltaY) * 0.1;
+      setZoomLevel(prev => Math.max(0.5, Math.min(3, prev + delta)));
+    }
+  };
+
+  // Reset pan when zoom level changes to 1
+  useEffect(() => {
+    if (zoomLevel === 1) {
+      setPanPosition({ x: 0, y: 0 });
+    }
+  }, [zoomLevel]);
+  
   // Canvas toolbar buttons
   const ToolbarButton = ({ icon, label, active, onClick }) => (
     <button
@@ -153,11 +196,12 @@ function WorkspaceCanvas() {
               />
             )}
             
-            {/* Save button - opens modal instead of prompt */}
-            <ToolbarButton 
+            {/* Replace Save button with SaveVersionButton component */}
+            <SaveVersionButton 
+              buttonSize="small" 
+              buttonText={isMobile ? "" : "Save Version"} 
               icon="💾"
-              label="Save"
-              onClick={() => setSaveModalOpen(true)}
+              variant="secondary"
             />
           </div>
         </div>
@@ -215,30 +259,32 @@ function WorkspaceCanvas() {
             variants={TRANSITIONS.FADE}
             className="h-full"
           >
+            {/* Upload Mode: Simplified upload interface without duplicate tips */}
             {currentMode === 'upload' && (
               <div className="h-full flex items-center justify-center">
-                <div className="max-w-lg w-full p-8">
+                <div className="max-w-lg w-full p-4">
                   <ImageUploader onImageUploaded={handleImageUploaded} />
                 </div>
               </div>
             )}
             
+            {/* Generate Mode: Show FashionModelPreviewWrapper directly */}
             {currentMode === 'generate' && currentImages.uploaded && (
-              <div className="flex items-center justify-center h-full">
-                <div className="relative max-h-full max-w-full p-4">
-                  <img 
-                    src={`data:image/jpeg;base64,${currentImages.uploaded}`}
-                    alt="Uploaded clothing"
-                    className="max-h-[80vh] max-w-full object-contain border dark:border-gray-700 shadow-md"
-                  />
+              <div className="h-full flex flex-col p-4">
+                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
+                  Generate a Fashion Model
+                </h2>
+                <div className="flex-1 overflow-auto">
+                  <FashionModelPreviewWrapper />
                 </div>
               </div>
             )}
             
+            {/* Edit Mode: Comparison view remains unchanged */}
             {currentMode === 'edit' && isComparing && currentImages.uploaded && currentImages.generated && (
               <div className="flex items-center justify-center h-full">
                 <div className="relative max-h-full max-w-full">
-                  {/* Image comparison slider */}
+                  {/* Image comparison slider - unchanged */}
                   <div 
                     ref={sliderRef}
                     className="relative border dark:border-gray-700 shadow-md"
@@ -296,23 +342,86 @@ function WorkspaceCanvas() {
               </div>
             )}
             
+            {/* Edit Mode: Normal view with editing tools */}
             {currentMode === 'edit' && !isComparing && currentImages.generated && (
-              <div className="flex items-center justify-center h-full">
-                <div className="relative max-h-full max-w-full p-4">
-                  <img 
-                    src={`data:image/jpeg;base64,${currentImages.generated}`}
-                    alt="Generated fashion model"
-                    className="max-h-[80vh] max-w-full object-contain border dark:border-gray-700 shadow-md"
-                  />
+              <div className="h-full flex flex-col">
+                <div className="flex-1 flex items-center justify-center overflow-auto p-4 relative">
+                  {/* Add zoom controls */}
+                  <div className="absolute bottom-4 right-4 bg-white dark:bg-gray-800 rounded-md shadow-md p-2 flex space-x-2 z-10">
+                    <button className="p-1 text-gray-700 dark:text-gray-300" onClick={() => setZoomLevel(prev => Math.min(prev + 0.25, 3))}>
+                      <span aria-label="Zoom in">➕</span>
+                    </button>
+                    <button className="p-1 text-gray-700 dark:text-gray-300" onClick={() => setZoomLevel(1)}>
+                      <span aria-label="Reset zoom">🔄</span>
+                    </button>
+                    <button className="p-1 text-gray-700 dark:text-gray-300" onClick={() => setZoomLevel(prev => Math.max(prev - 0.25, 0.5))}>
+                      <span aria-label="Zoom out">➖</span>
+                    </button>
+                  </div>
+                  
+                  {/* Image with zoom and pan applied */}
+                  <div 
+                    className="relative max-h-full max-w-full overflow-hidden"
+                    ref={imageContainerRef}
+                    onWheel={handleWheel}
+                  >
+                    <div 
+                      className={`transform ${isPanning ? 'cursor-grabbing' : zoomLevel > 1 ? 'cursor-grab' : 'cursor-default'}`}
+                      style={{ 
+                        transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
+                        transformOrigin: 'center center',
+                        transition: isPanning ? 'none' : 'transform 0.2s' 
+                      }}
+                      onMouseDown={handlePanStart}
+                      onMouseUp={handlePanEnd}
+                      onMouseLeave={handlePanEnd}
+                      onMouseMove={(e) => zoomLevel > 1 && isPanning && handlePan(e, { delta: { x: e.movementX, y: e.movementY } })}
+                    >
+                      <img 
+                        src={`data:image/jpeg;base64,${currentImages.generated}`}
+                        alt="Generated fashion model"
+                        className="max-h-[80vh] max-w-full object-contain border dark:border-gray-700 shadow-md"
+                        onDoubleClick={() => setZoomLevel(prev => prev === 1 ? 2 : 1)}
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Add editing tools below the image */}
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                  <div className="flex flex-wrap gap-3">
+                    <button className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-300">
+                      <span className="mr-1">🎨</span> Adjust Colors
+                    </button>
+                    <button className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-300">
+                      <span className="mr-1">🖼️</span> Background
+                    </button>
+                    <button className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-300">
+                      <span className="mr-1">📷</span> Filters
+                    </button>
+                    <button className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-300">
+                      <span className="mr-1">✨</span> Effects
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
             
+            {/* Empty state - simplified with no duplicate tips */}
             {!currentImages.uploaded && !currentImages.generated && (
-              <div className="flex items-center justify-center h-full text-gray-500">
-                <div className="text-center">
-                  <p className="text-xl mb-2">No images yet</p>
-                  <p className="text-sm">Upload a clothing image to get started</p>
+              <div className="flex items-center justify-center h-full text-center">
+                <div className="max-w-sm p-6">
+                  <div className="text-6xl mb-4 opacity-70">📸</div>
+                  <h3 className="text-xl font-medium text-gray-700 dark:text-gray-300 mb-4">Start a New Project</h3>
+                  <button 
+                    className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-md transition-colors duration-200 w-full flex items-center justify-center"
+                    onClick={() => setCurrentMode('upload')}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    Upload Clothing Image
+                  </button>
                 </div>
               </div>
             )}

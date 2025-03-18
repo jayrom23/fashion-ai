@@ -72,10 +72,12 @@ function FashionModelPreviewWrapper() {
     return null;
   }
   
+  // Pass hidePreview to FashionModelPreview
   return (
     <FashionModelPreview
       clothingImage={currentImages.uploaded}
       onImageGenerated={handleImageGenerated}
+      hidePreview={true} // Tell the component to hide the preview image
     />
   );
 }

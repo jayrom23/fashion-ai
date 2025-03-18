@@ -78,8 +78,8 @@ function Modal({ isOpen, onClose, title, children, size = 'md' }) {
               </button>
             </div>
             
-            {/* Modal body */}
-            <div className="p-5">{children}</div>
+            {/* Modal body - ensure content has proper contrast */}
+            <div className="p-5 text-gray-800 dark:text-gray-200">{children}</div>
           </motion.div>
         </motion.div>
       )}
